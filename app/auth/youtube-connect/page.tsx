@@ -6,13 +6,15 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Play, Youtube, Loader2, CheckCircle, AlertCircle, ExternalLink, RefreshCw } from "lucide-react"
+import { Play, Youtube, Loader2, CheckCircle, AlertCircle, ExternalLink, RefreshCw, LogOut } from "lucide-react"
 import useCredential from "@/hooks/ai/useCredential"
 import useYouTubeCredentials from "@/hooks/youtube/useYouTubeCredentials"
+import { useAuth } from "@/hooks/auth"
 
 export default function YouTubeConnectPage() {
   const [isConnecting, setIsConnecting] = useState(false)
   const router = useRouter()
+  const { logout } = useAuth()
   
   // Existing credential management
   const { 
@@ -37,20 +39,16 @@ export default function YouTubeConnectPage() {
   } = useYouTubeCredentials()
 
   const handleYouTubeConnect = async () => {
-    console.log('🎬 User initiated YouTube connection...')
     setIsConnecting(true)
     
     try {
       // Create YouTube OAuth token
       const tokenResponse = await createYouTubeToken()
-      console.log('✅ Token creation completed, opening OAuth URL...')
       
       // Open the OAuth URL in a new window
       const authWindow = openAuthUrl(tokenResponse.auth_url)
       
       if (authWindow) {
-        console.log('🌐 OAuth window opened, waiting for user completion...')
-        
         // OAuth window opened successfully
         // Note: In a real implementation, you would:
         // 1. Listen for OAuth completion via webhook or polling
@@ -58,15 +56,11 @@ export default function YouTubeConnectPage() {
         // 3. Redirect to dashboard only after confirmed OAuth success
         
         // For now, we'll show success message and provide manual redirect
-        console.log('🌐 OAuth window opened, waiting for user completion...')
-        
-        // Show success message and manual redirect button
         // The user will need to complete OAuth in the opened window
         // and then manually proceed to dashboard
       }
       
     } catch (err: any) {
-      console.error('❌ YouTube connection failed:', err)
       // Error state is already handled by the hook
     } finally {
       setIsConnecting(false)
@@ -74,17 +68,13 @@ export default function YouTubeConnectPage() {
   }
 
   const handleRetry = () => {
-    console.log('🔄 User requested retry...')
     resetTokenState()
   }
 
   const handleProceedToDashboard = () => {
-    console.log('🚀 User proceeding to dashboard after OAuth...')
-    
     // Check if there's a stored redirect URL
     const redirectUrl = localStorage.getItem('youtube_redirect_after_auth')
     if (redirectUrl) {
-      console.log('🔄 Redirecting back to stored URL:', redirectUrl)
       localStorage.removeItem('youtube_redirect_after_auth')
       router.push(redirectUrl)
     } else {
@@ -93,19 +83,20 @@ export default function YouTubeConnectPage() {
   }
 
   const handleRefreshCheck = async () => {
-    console.log('🔄 User requested credentials refresh check...')
     await refreshCredentialsCheck()
   }
 
   const handleReconnect = () => {
-    console.log('🔄 User requested YouTube reconnection...')
     resetTokenState()
     // Clear any existing error states
   }
 
+  const handleLogout = () => {
+    logout()
+  }
+
   // Check for existing credentials on component mount
   useEffect(() => {
-    console.log('🎬 YouTube Connect page mounted, checking for existing credentials...')
     checkYouTubeCredentials(false)
   }, [checkYouTubeCredentials])
 
@@ -128,8 +119,6 @@ export default function YouTubeConnectPage() {
       showNoCredentials // Ensure we're in the "no credentials" state
 
     if (shouldAutoConnect) {
-      console.log('🚀 Auto-initiating YouTube OAuth for user without credentials...')
-      
       // Add a small delay to ensure UI has updated and to prevent double-calls
       const timeoutId = setTimeout(() => {
         handleYouTubeConnect()
@@ -139,44 +128,33 @@ export default function YouTubeConnectPage() {
     }
   }, [isLoadingAny, hasCredentials, authUrl, hasAnyError, lastChecked, showNoCredentials, handleYouTubeConnect])
 
-  // Debug logging for UI state
-  console.log('🎬 YouTube Connect UI State:', {
-    hasCredentials,
-    hasCredentialsData,
-    isLoadingAny,
-    hasAnyError,
-    showCredentialsFound,
-    showNoCredentials,
-    showOAuthFlow,
-  })
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center p-3 sm:p-4 lg:p-6">
+      <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-xl">
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 group">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center group-hover:opacity-90 transition-opacity crypto-primary-gradient crypto-glow">
-              <Play className="h-5 w-5 text-white fill-current" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center group-hover:opacity-90 transition-opacity crypto-primary-gradient crypto-glow">
+              <Play className="h-4 w-4 sm:h-5 sm:w-5 text-white fill-current" />
             </div>
-            <span className="text-2xl font-bold text-foreground">YouTube Automator</span>
+            <span className="text-xl sm:text-2xl font-bold text-foreground">YouTube Automator</span>
           </Link>
         </div>
 
         <Card className="shadow-lg">
-          <CardHeader className="text-center">
-            <div className="mx-auto w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mb-4">
-              <Youtube className="h-8 w-8 text-white" />
+          <CardHeader className="text-center px-4 sm:px-6">
+            <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-red-500 rounded-full flex items-center justify-center mb-3 sm:mb-4">
+              <Youtube className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
             </div>
-            <CardTitle className="text-2xl">
+            <CardTitle className="text-lg sm:text-xl lg:text-2xl">
               {showCredentialsFound ? 'YouTube Already Connected!' : 'Connect Your YouTube Channel'}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm sm:text-base">
               {showCredentialsFound ? 'Your YouTube account is connected and ready to use' :
                'Connect your YouTube account to start automating your video content with AI'}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
 
             {/* Auto-redirect Message */}
             {typeof window !== 'undefined' && localStorage.getItem('youtube_redirect_after_auth') && !isLoadingAny && (
@@ -214,24 +192,23 @@ export default function YouTubeConnectPage() {
                   <div className="space-y-2">
                     <p>✅ YouTube channel is connected and active!</p>
                     <div className="text-sm text-muted-foreground space-y-1">
-                      <p>• Token type: {credentials?.token_type || 'Unknown'}</p>
-                      <p>• Connected: {credentials?.created_at ? new Date(credentials.created_at).toLocaleDateString() : 'Unknown'}</p>
+                      <p>• Client ID: {credentials?.client_id_preview || 'Unknown'}</p>
+                      <p>• Status: {credentials?.is_active ? 'Active' : 'Inactive'}</p>
                       <p>• Backend will automatically refresh tokens as needed</p>
                     </div>
-                    <div className="flex gap-2 pt-2">
+                    <div className="flex flex-col sm:flex-row gap-2 pt-2">
                       <Button
                         onClick={() => {
                           // Check if there's a stored redirect URL for immediate redirect
                           const redirectUrl = localStorage.getItem('youtube_redirect_after_auth')
                           if (redirectUrl) {
-                            console.log('🔄 Found stored redirect URL, going to:', redirectUrl)
                             localStorage.removeItem('youtube_redirect_after_auth')
                             router.push(redirectUrl)
                           } else {
                             handleProceedToDashboard()
                           }
                         }}
-                        className="crypto-button-primary"
+                        className="crypto-button-primary flex-1"
                         size="sm"
                       >
                         {localStorage.getItem('youtube_redirect_after_auth') ? 'Continue to Previous Page' : 'Go to Dashboard'}
@@ -241,9 +218,11 @@ export default function YouTubeConnectPage() {
                         variant="outline"
                         size="sm"
                         disabled={isChecking}
+                        className="flex-1 sm:flex-none"
                       >
                         <RefreshCw className={`h-4 w-4 mr-1 ${isChecking ? 'animate-spin' : ''}`} />
-                        Refresh Check
+                        <span className="hidden sm:inline">Refresh Check</span>
+                        <span className="sm:hidden">Refresh</span>
                       </Button>
                     </div>
                   </div>
@@ -306,18 +285,18 @@ export default function YouTubeConnectPage() {
 
             {/* Features List - Only show when no credentials */}
             {showNoCredentials && !isLoadingAny && (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
-                  <CheckCircle className="h-5 w-5 crypto-profit" />
-                  <span className="text-sm">Generate AI-powered titles and descriptions</span>
+                  <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 crypto-profit flex-shrink-0" />
+                  <span className="text-xs sm:text-sm">Generate AI-powered titles and descriptions</span>
                 </div>
                 <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
-                  <CheckCircle className="h-5 w-5 crypto-profit" />
-                  <span className="text-sm">Create custom thumbnails automatically</span>
+                  <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 crypto-profit flex-shrink-0" />
+                  <span className="text-xs sm:text-sm">Create custom thumbnails automatically</span>
                 </div>
                 <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
-                  <CheckCircle className="h-5 w-5 crypto-profit" />
-                  <span className="text-sm">Schedule and publish videos seamlessly</span>
+                  <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 crypto-profit flex-shrink-0" />
+                  <span className="text-xs sm:text-sm">Schedule and publish videos seamlessly</span>
                 </div>
               </div>
             )}
@@ -330,8 +309,8 @@ export default function YouTubeConnectPage() {
                 disabled={isLoadingAny}
                 size="lg"
               >
-                <Youtube className="mr-2 h-5 w-5" />
-                Connect with YouTube
+                <Youtube className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="text-sm sm:text-base">Connect with YouTube</span>
               </Button>
             )}
 
@@ -343,7 +322,7 @@ export default function YouTubeConnectPage() {
                 className="w-full"
                 size="lg"
               >
-                Try Again
+                <span className="text-sm sm:text-base">Try Again</span>
               </Button>
             )}
 
@@ -355,10 +334,16 @@ export default function YouTubeConnectPage() {
           </CardContent>
         </Card>
 
-        <div className="mt-8 text-center">
-          <Link href="/auth/login" className="text-sm text-muted-foreground hover:text-foreground">
-            ← Back to login
-          </Link>
+        <div className="mt-6 sm:mt-8 text-center">
+          <Button
+            onClick={handleLogout}
+            variant="ghost"
+            size="sm"
+            className="text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Back to Login
+          </Button>
         </div>
       </div>
     </div>

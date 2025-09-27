@@ -7,14 +7,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, Key, Eye, EyeOff, CheckCircle } from 'lucide-react'
+import { Loader2, Key, Eye, EyeOff, CheckCircle, LogOut } from 'lucide-react'
 import { useCreateYouTubeCredentials } from '@/hooks/youtube'
 import { useYouTubeCredentials } from '@/hooks/youtube'
 import { useAuth } from '@/hooks/auth'
 
 export default function CredentialPage() {
   const router = useRouter()
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
+  const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth()
   const { createCredentials, isLoading, error, clearError } = useCreateYouTubeCredentials()
   const { 
     checkYouTubeCredentials, 
@@ -41,7 +41,6 @@ export default function CredentialPage() {
   // Check for existing credentials when component mounts
   useEffect(() => {
     if (isAuthenticated) {
-      console.log('🔍 Checking for existing YouTube credentials...')
       checkYouTubeCredentials(false)
     }
   }, [isAuthenticated, checkYouTubeCredentials])
@@ -49,7 +48,6 @@ export default function CredentialPage() {
   // Auto-redirect to YouTube connect if credentials already exist
   useEffect(() => {
     if (hasCredentials && !isChecking) {
-      console.log('✅ Credentials found, redirecting to YouTube connect...')
       router.push('/auth/youtube-connect')
     }
   }, [hasCredentials, isChecking, router])
@@ -97,14 +95,25 @@ export default function CredentialPage() {
       router.push('/auth/youtube-connect')
     } catch (err) {
       // Error is already handled by the hook
-      console.error('Failed to create credentials:', err)
     }
   }
 
   if (authLoading || !isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center crypto-gradient-bg">
-        <Loader2 className="h-8 w-8 animate-spin crypto-profit text-[#fd1d1d]" />
+      <div className="min-h-screen flex items-center justify-center crypto-gradient-bg p-3 sm:p-4">
+        {/* Logout Button - Top Right */}
+        <div className="fixed top-3 right-3 sm:top-4 sm:right-4 z-50">
+          <Button
+            onClick={logout}
+            variant="outline"
+            size="sm"
+            className="bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90 crypto-text-primary text-xs sm:text-sm"
+          >
+            <LogOut className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Back to Login</span>
+          </Button>
+        </div>
+        <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin crypto-profit text-[#fd1d1d]" />
       </div>
     )
   }
@@ -112,11 +121,23 @@ export default function CredentialPage() {
   // Show loading while checking credentials
   if (isChecking) {
     return (
-      <div className="min-h-screen crypto-gradient-bg flex items-center justify-center p-4">
+      <div className="min-h-screen crypto-gradient-bg flex items-center justify-center p-3 sm:p-4">
+        {/* Logout Button - Top Right */}
+        <div className="fixed top-3 right-3 sm:top-4 sm:right-4 z-50">
+          <Button
+            onClick={logout}
+            variant="outline"
+            size="sm"
+            className="bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90 crypto-text-primary text-xs sm:text-sm"
+          >
+            <LogOut className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Back to Login</span>
+          </Button>
+        </div>
         <div className="text-center space-y-3">
-          <Loader2 className="h-8 w-8 animate-spin crypto-profit mx-auto text-[#fd1d1d]" />
-          <p className="crypto-text-primary text-base font-medium">Checking for existing credentials...</p>
-          <p className="crypto-text-secondary text-sm">Please wait while we verify your setup</p>
+          <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin crypto-profit mx-auto text-[#fd1d1d]" />
+          <p className="crypto-text-primary text-sm sm:text-base font-medium">Checking for existing credentials...</p>
+          <p className="crypto-text-secondary text-xs sm:text-sm">Please wait while we verify your setup</p>
         </div>
       </div>
     )
@@ -125,42 +146,69 @@ export default function CredentialPage() {
   // Show credentials already exist message (briefly before redirect)
   if (hasCredentials) {
     return (
-      <div className="min-h-screen crypto-gradient-bg flex items-center justify-center p-4">
+      <div className="min-h-screen crypto-gradient-bg flex items-center justify-center p-3 sm:p-4">
+        {/* Logout Button - Top Right */}
+        <div className="fixed top-3 right-3 sm:top-4 sm:right-4 z-50">
+          <Button
+            onClick={logout}
+            variant="outline"
+            size="sm"
+            className="bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90 crypto-text-primary text-xs sm:text-sm"
+          >
+            <LogOut className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Logout</span>
+            <span className="sm:hidden">Out</span>
+          </Button>
+        </div>
         <div className="text-center space-y-3">
-          <div className="mx-auto w-12 h-12 bg-profit/10 rounded-full flex items-center justify-center crypto-glow">
-            <CheckCircle className="w-6 h-6 crypto-profit" />
+          <div className="mx-auto w-10 h-10 sm:w-12 sm:h-12 bg-profit/10 rounded-full flex items-center justify-center crypto-glow">
+            <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 crypto-profit" />
           </div>
-          <h2 className="text-xl font-bold crypto-text-primary">Credentials Found!</h2>
-          <p className="crypto-text-secondary text-sm">Redirecting to YouTube connect...</p>
-          <Loader2 className="h-5 w-5 animate-spin crypto-profit mx-auto" />
+          <h2 className="text-lg sm:text-xl font-bold crypto-text-primary">Credentials Found!</h2>
+          <p className="crypto-text-secondary text-xs sm:text-sm">Redirecting to YouTube connect...</p>
+          <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin crypto-profit mx-auto" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen crypto-gradient-bg flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen crypto-gradient-bg flex items-center justify-center p-3 sm:p-4 lg:p-6">
+      {/* Logout Button - Top Right */}
+      <div className="fixed top-3 right-3 sm:top-4 sm:right-4 z-50">
+        <Button
+          onClick={logout}
+          variant="outline"
+          size="sm"
+          className="bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90 crypto-text-primary text-xs sm:text-sm"
+        >
+          <LogOut className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+          <span className="hidden sm:inline">Logout</span>
+          <span className="sm:hidden">Out</span>
+        </Button>
+      </div>
+
+      <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg">
         <Card className="shadow-2xl border-0 bg-card/95 backdrop-blur-sm crypto-card-enhanced">
-          <CardHeader className="text-center space-y-3 pb-6">
-            <div className="mx-auto w-16 h-16 crypto-primary-gradient rounded-xl flex items-center justify-center crypto-glow-pulse">
-              <Key className="w-8 h-8 text-white" />
+          <CardHeader className="text-center space-y-2 sm:space-y-3 pb-4 sm:pb-6 px-4 sm:px-6">
+            <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 crypto-primary-gradient rounded-xl flex items-center justify-center crypto-glow-pulse">
+              <Key className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
             <div className="space-y-1">
-              <CardTitle className="text-2xl font-bold crypto-text-primary">
+              <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold crypto-text-primary">
                 YouTube Credentials
               </CardTitle>
-              <CardDescription className="text-base crypto-text-secondary">
+              <CardDescription className="text-sm sm:text-base crypto-text-secondary">
                 Enter your YouTube API credentials to continue
               </CardDescription>
             </div>
           </CardHeader>
           
-          <CardContent className="px-6 pb-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               {/* Client ID Field */}
               <div className="space-y-2">
-                <Label htmlFor="clientId" className="text-sm font-semibold crypto-text-primary">
+                <Label htmlFor="clientId" className="text-xs sm:text-sm font-semibold crypto-text-primary">
                   Client ID
                 </Label>
                 <Input
@@ -169,7 +217,7 @@ export default function CredentialPage() {
                   placeholder="Enter your YouTube Client ID"
                   value={clientId}
                   onChange={(e) => setClientId(e.target.value)}
-                  className={`crypto-input-enhanced text-sm py-2.5 px-3 ${validationErrors.clientId ? 'border-loss focus:border-loss focus:ring-loss' : ''}`}
+                  className={`crypto-input-enhanced text-xs sm:text-sm py-2 sm:py-2.5 px-2 sm:px-3 ${validationErrors.clientId ? 'border-loss focus:border-loss focus:ring-loss' : ''}`}
                   disabled={isLoading}
                 />
                 {validationErrors.clientId && (
@@ -179,7 +227,7 @@ export default function CredentialPage() {
 
               {/* Client Secret Field */}
               <div className="space-y-2">
-                <Label htmlFor="clientSecret" className="text-sm font-semibold crypto-text-primary">
+                <Label htmlFor="clientSecret" className="text-xs sm:text-sm font-semibold crypto-text-primary">
                   Client Secret
                 </Label>
                 <div className="relative">
@@ -189,21 +237,21 @@ export default function CredentialPage() {
                     placeholder="Enter your YouTube Client Secret"
                     value={clientSecret}
                     onChange={(e) => setClientSecret(e.target.value)}
-                    className={`pr-10 crypto-input-enhanced text-sm py-2.5 px-3 ${validationErrors.clientSecret ? 'border-loss focus:border-loss focus:ring-loss' : ''}`}
+                    className={`pr-8 sm:pr-10 crypto-input-enhanced text-xs sm:text-sm py-2 sm:py-2.5 px-2 sm:px-3 ${validationErrors.clientSecret ? 'border-loss focus:border-loss focus:ring-loss' : ''}`}
                     disabled={isLoading}
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 h-7 w-7 p-0 hover:bg-brand-10 crypto-text-tertiary hover:crypto-text-primary"
+                    className="absolute right-1 sm:right-1.5 top-1/2 -translate-y-1/2 h-6 w-6 sm:h-7 sm:w-7 p-0 hover:bg-brand-10 crypto-text-tertiary hover:crypto-text-primary"
                     onClick={() => setShowSecret(!showSecret)}
                     disabled={isLoading}
                   >
                     {showSecret ? (
-                      <EyeOff className="h-3.5 w-3.5" />
+                      <EyeOff className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                     ) : (
-                      <Eye className="h-3.5 w-3.5" />
+                      <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                     )}
                   </Button>
                 </div>
@@ -222,23 +270,23 @@ export default function CredentialPage() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full crypto-button-enhanced text-base py-3 font-semibold"
+                className="w-full crypto-button-enhanced text-sm sm:text-base py-2.5 sm:py-3 font-semibold"
                 disabled={isLoading || !clientId.trim() || !clientSecret.trim()}
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin crypto-spinner" />
-                    Creating Credentials...
+                    <Loader2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin crypto-spinner" />
+                    <span className="text-xs sm:text-sm">Creating Credentials...</span>
                   </>
                 ) : (
-                  'Create Credentials'
+                  <span className="text-sm sm:text-base">Create Credentials</span>
                 )}
               </Button>
             </form>
 
             {/* Help Text */}
-            <div className="mt-6 text-center">
-              <p className="text-sm crypto-text-secondary">
+            <div className="mt-4 sm:mt-6 text-center">
+              <p className="text-xs sm:text-sm crypto-text-secondary">
                 Don't have credentials?{' '}
                 <a
                   href="https://developers.google.com/youtube/v3/getting-started"

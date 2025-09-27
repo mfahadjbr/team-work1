@@ -10,17 +10,14 @@ export interface YouTubeTokenResponse {
 }
 
 export interface YouTubeToken {
-  refresh_token: string;
-  id: number;
+  status: string;
+  message: string;
+  has_access_token: boolean;
+  has_refresh_token: boolean;
+  expires_at: string;
   token_type: string;
   scope: string;
-  refresh_token_expires_in: number | null;
-  updated_at: string | null;
-  user_id: string;
-  access_token: string;
-  expires_in: number;
-  expires_at: string;
-  created_at: string;
+  access_token_preview: string;
 }
 
 export interface YouTubeTokenState {
@@ -262,22 +259,33 @@ export default function useCredential() {
       console.log('[YouTube][GET Token] Response', {
         status: res.status,
         keys: Object.keys(res.data || {}),
-        access_token_preview: maskToken(res.data?.access_token),
-        refresh_token_preview: maskToken(res.data?.refresh_token),
-        expires_in: res.data?.expires_in,
-        expires_at: res.data?.expires_at,
+        tokenStatus: res.data?.status,
+        message: res.data?.message,
+        hasAccessToken: res.data?.has_access_token,
+        hasRefreshToken: res.data?.has_refresh_token,
+        expiresAt: res.data?.expires_at,
+        tokenType: res.data?.token_type,
+        scope: res.data?.scope,
+        accessTokenPreview: res.data?.access_token_preview,
       })
+
+      // Check if token is valid
+      const isValidToken = res.data?.status === 'valid' && res.data?.has_access_token
+      
+      if (!isValidToken) {
+        throw new Error(res.data?.message || 'Token is not valid')
+      }
 
       // Update state with token data
       setTokenState(prev => ({
         ...prev,
         isLoading: false,
         error: null,
-        message: 'Token retrieved successfully',
+        message: res.data?.message || 'Token retrieved successfully',
         token: res.data
       }))
 
-      toast({ title: 'Fetched YouTube token', description: 'Access token received successfully.' })
+      toast({ title: 'Fetched YouTube token', description: res.data?.message || 'Access token received successfully.' })
       return res.data
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
@@ -331,22 +339,33 @@ export default function useCredential() {
       console.log('[YouTube][Refresh Token] Response', {
         status: res.status,
         keys: Object.keys(res.data || {}),
-        access_token_preview: maskToken(res.data?.access_token),
-        refresh_token_preview: maskToken(res.data?.refresh_token),
-        expires_in: res.data?.expires_in,
-        expires_at: res.data?.expires_at,
+        tokenStatus: res.data?.status,
+        message: res.data?.message,
+        hasAccessToken: res.data?.has_access_token,
+        hasRefreshToken: res.data?.has_refresh_token,
+        expiresAt: res.data?.expires_at,
+        tokenType: res.data?.token_type,
+        scope: res.data?.scope,
+        accessTokenPreview: res.data?.access_token_preview,
       })
+
+      // Check if token is valid
+      const isValidToken = res.data?.status === 'valid' && res.data?.has_access_token
+      
+      if (!isValidToken) {
+        throw new Error(res.data?.message || 'Token is not valid')
+      }
 
       // Update state with refreshed token data
       setTokenState(prev => ({
         ...prev,
         isLoading: false,
         error: null,
-        message: 'Token refreshed successfully',
+        message: res.data?.message || 'Token refreshed successfully',
         token: res.data
       }))
 
-      toast({ title: 'Token refreshed', description: 'YouTube access token refreshed.' })
+      toast({ title: 'Token refreshed', description: res.data?.message || 'YouTube access token refreshed.' })
       return res.data
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
@@ -373,17 +392,6 @@ export default function useCredential() {
       throw error
     }
   }, [API_BASE_URL, getAuthHeaders, maskToken, toast, userId])
-
-  // Log state changes for debugging
-  console.log('🔄 YouTube Credential State:', {
-    isLoading: tokenState.isLoading,
-    hasError: !!tokenState.error,
-    hasAuthUrl: !!tokenState.authUrl,
-    hasMessage: !!tokenState.message,
-    hasToken: !!tokenState.token,
-    error: tokenState.error,
-    message: tokenState.message,
-  })
 
   return {
     // State

@@ -219,13 +219,36 @@ export default function useAuth() {
   }, [])
 
   const logout = useCallback(() => {
-    console.log('🚪 Starting logout process...')
+    // Clear all localStorage items related to the application
+    const itemsToRemove = [
+      'auth_token',
+      'user_data', 
+      'user_id',
+      'gemini_api_key',
+      'current_video_data',
+      'current_video_id',
+      'youtube_redirect_after_auth'
+    ]
     
-    // Clear localStorage
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('user_data')
-    localStorage.removeItem('user_id')
-    console.log('🗑️ Cleared localStorage data')
+    itemsToRemove.forEach(item => {
+      localStorage.removeItem(item)
+    })
+    
+    // Also clear any other localStorage items that might be app-related
+    // This is a more thorough cleanup
+    const allKeys = Object.keys(localStorage)
+    allKeys.forEach(key => {
+      // Remove any keys that might be related to our app
+      if (key.includes('auth') || 
+          key.includes('user') || 
+          key.includes('token') || 
+          key.includes('video') || 
+          key.includes('youtube') || 
+          key.includes('gemini') ||
+          key.includes('credential')) {
+        localStorage.removeItem(key)
+      }
+    })
     
     // Reset auth state
     setAuthState({
@@ -234,11 +257,9 @@ export default function useAuth() {
       isAuthenticated: false,
       isLoading: false,
     })
-    console.log('🔄 Reset auth state to unauthenticated')
     
     // Redirect to login page
     if (typeof window !== 'undefined') {
-      console.log('🔄 Redirecting to login page...')
       window.location.href = '/auth/login'
     }
   }, [])

@@ -4,17 +4,10 @@ import useAuth from '../auth/useAuth'
 import { useToast } from '../common/useToast'
 
 interface YouTubeCredentials {
-  id: number
-  user_id: string
-  access_token: string
-  refresh_token: string
-  token_type: string
-  expires_in: number
-  scope: string
-  expires_at: string
-  refresh_token_expires_in: number
-  created_at: string
-  updated_at: string
+  has_credentials: boolean
+  is_active: boolean
+  client_id_preview: string
+  client_secret_preview: string
 }
 
 export interface YouTubeCredentialsState {
@@ -105,7 +98,6 @@ export default function useYouTubeCredentials() {
 
   const checkYouTubeCredentials = useCallback(async (showSuccessToast = false): Promise<YouTubeCredentials | null> => {
     if (!userId) {
-      console.log('🔍 No user ID found, cannot check YouTube credentials')
       setCredentialsState(prev => ({
         ...prev,
         hasCredentials: false,
@@ -115,8 +107,6 @@ export default function useYouTubeCredentials() {
       return null
     }
 
-    console.log('🔍 Checking YouTube credentials for user:', userId)
-    
     setCredentialsState(prev => ({
       ...prev,
       isChecking: true,
@@ -125,47 +115,26 @@ export default function useYouTubeCredentials() {
 
     try {
       const headers = getAuthHeaders()
-      const url = `/youtube/status`
-      
-      console.log('[YouTube][Check Credentials] Request', {
-        userId,
-        url: `${API_BASE_URL}${url}`,
-        hasAuthHeader: !!(headers as any)?.Authorization,
-      })
+      const url = `/youtube-credentials/status`
 
       const response = await credentialsApi.get(url, { headers })
-      
-      console.log('[YouTube][Check Credentials] Response', {
-        status: response.status,
-        hasCredentials: !!response.data,
-        responseStatus: response.data?.status,
-        message: response.data?.message,
-        hasAccessTo: response.data?.has_access_to,
-      })
 
-      // Since backend handles token refresh automatically, just check if token exists
-      const hasValidToken = !!response.data && response.data.status === 'valid'
-      
-      console.log('[YouTube][Check Credentials] Token Status', {
-        hasData: !!response.data,
-        status: response.data?.status,
-        message: response.data?.message,
-        willSetHasCredentials: hasValidToken,
-      })
+      // Check if credentials exist and are active
+      const hasValidCredentials = !!response.data && response.data.has_credentials && response.data.is_active
       
       setCredentialsState(prev => ({
         ...prev,
         isChecking: false,
         isLoading: false,
         error: null,
-        hasCredentials: hasValidToken,
+        hasCredentials: hasValidCredentials,
         credentials: response.data || null,
         lastChecked: Date.now(),
       }))
 
-      if (showSuccessToast && response.data) {
+      if (showSuccessToast && response.data && hasValidCredentials) {
         toast({ 
-          title: 'YouTube Connected', 
+          title: 'YouTube Credentials Found', 
           description: 'YouTube credentials are active and valid.' 
         })
       }
@@ -173,8 +142,6 @@ export default function useYouTubeCredentials() {
       return response.data || null
 
     } catch (error: any) {
-      console.error('[YouTube][Check Credentials] Error:', error)
-      
       let errorMessage = 'Failed to check YouTube credentials'
       let hasCredentials = false
       let shouldSetError = true
@@ -221,8 +188,6 @@ export default function useYouTubeCredentials() {
   }, [userId, getAuthHeaders, maskToken, toast])
 
   const clearCredentials = useCallback(() => {
-    console.log('🗑️ Clearing YouTube credentials state')
-    
     setCredentialsState({
       isLoading: false,
       isChecking: false,
@@ -234,32 +199,15 @@ export default function useYouTubeCredentials() {
   }, [])
 
   const refreshCredentialsCheck = useCallback(async () => {
-    console.log('🔄 Refreshing YouTube credentials check')
     return checkYouTubeCredentials(false)
   }, [checkYouTubeCredentials])
 
   // Auto-check credentials when userId becomes available
   useEffect(() => {
     if (userId && !credentialsState.lastChecked) {
-      console.log('🚀 Auto-checking YouTube credentials for newly loaded user')
       checkYouTubeCredentials(false)
     }
   }, [userId, credentialsState.lastChecked, checkYouTubeCredentials])
-
-  // Log state changes for debugging
-  useEffect(() => {
-    console.log('🔄 YouTube Credentials State Updated:', {
-      isChecking: credentialsState.isChecking,
-      isLoading: credentialsState.isLoading,
-      hasCredentials: credentialsState.hasCredentials,
-      hasError: !!credentialsState.error,
-      hasCredentialsData: !!credentialsState.credentials,
-      credentialsKeys: credentialsState.credentials ? Object.keys(credentialsState.credentials) : [],
-      expires_at: credentialsState.credentials?.expires_at,
-      lastChecked: credentialsState.lastChecked ? new Date(credentialsState.lastChecked).toISOString() : null,
-      error: credentialsState.error,
-    })
-  }, [credentialsState])
 
   return {
     // State

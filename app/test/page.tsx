@@ -64,7 +64,7 @@ export default function TestPage() {
   }
 
   if (!isAuthenticated) {
-    return (
+  return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardHeader>
@@ -72,7 +72,7 @@ export default function TestPage() {
             <CardDescription>Please login to test the API integrations</CardDescription>
           </CardHeader>
         </Card>
-      </div>
+    </div>
     )
   }
 

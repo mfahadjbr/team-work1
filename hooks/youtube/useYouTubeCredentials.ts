@@ -19,7 +19,7 @@ export interface YouTubeCredentialsState {
   lastChecked: number | null
 }
 
-const API_BASE_URL = 'http://saas-backend.duckdns.org'
+const API_BASE_URL = 'https://saas-backend.duckdns.org'
 
 // Create axios instance for YouTube credentials API calls
 const credentialsApi = axios.create({
@@ -115,12 +115,19 @@ export default function useYouTubeCredentials() {
 
     try {
       const headers = getAuthHeaders()
-      const url = `/youtube-credentials/status`
+      const url = `/youtube/get-token`
 
       const response = await credentialsApi.get(url, { headers })
 
-      // Check if credentials exist and are active
-      const hasValidCredentials = !!response.data && response.data.has_credentials && response.data.is_active
+      // New response shape from /youtube/get-token
+      // {
+      //   success: boolean,
+      //   message: string,
+      //   data: { access_token: string, ... }
+      // }
+      const success = !!response.data && response.data.success === true
+      const hasToken = success && !!response.data.data && !!response.data.data.access_token
+      const hasValidCredentials = hasToken
       
       setCredentialsState(prev => ({
         ...prev,
@@ -128,14 +135,17 @@ export default function useYouTubeCredentials() {
         isLoading: false,
         error: null,
         hasCredentials: hasValidCredentials,
-        credentials: response.data || null,
+        // store minimal info; retain previous type
+        credentials: hasValidCredentials
+          ? { has_credentials: true, is_active: true, client_id_preview: '', client_secret_preview: '' }
+          : null,
         lastChecked: Date.now(),
       }))
 
-      if (showSuccessToast && response.data && hasValidCredentials) {
+      if (showSuccessToast && hasValidCredentials) {
         toast({ 
           title: 'YouTube Credentials Found', 
-          description: 'YouTube credentials are active and valid.' 
+          description: 'YouTube token is available and valid.' 
         })
       }
 
@@ -150,9 +160,10 @@ export default function useYouTubeCredentials() {
         if (error.response?.status === 401) {
           errorMessage = 'Authentication failed. Please login again.'
         } else if (error.response?.status === 404) {
-          errorMessage = 'No YouTube credentials found'
+          // /youtube/get-token not found or no token
+          errorMessage = 'No YouTube token found'
           hasCredentials = false
-          shouldSetError = false // Don't treat 404 as an error - it's expected when no credentials exist
+          shouldSetError = false // treat as expected when no token exists
         } else if (error.response?.status === 403) {
           errorMessage = 'Access denied to YouTube credentials'
         } else if (error.response?.status === 500) {

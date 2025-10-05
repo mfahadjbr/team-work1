@@ -34,49 +34,15 @@ export const UploadSection = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Gemini API Key */}
-        <div className="space-y-2">
-          <Label htmlFor="gemini-key" className="crypto-text-primary">Gemini API Key</Label>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Input
-              id="gemini-key"
-              type="password"
-              placeholder="Enter your Gemini API key"
-              value={state.geminiApiKey}
-              onChange={(e) => updateState({ geminiApiKey: e.target.value })}
-              className="flex-1 crypto-input"
-            />
-            <Button
-              onClick={handlers.handleSaveApiKey}
-              disabled={!state.geminiApiKey || state.isSaving}
-              className="sm:w-auto w-full crypto-button-primary"
-            >
-              {state.saveButtonText}
-            </Button>
-          </div>
-        </div>
+        {/* Gemini API Key moved to Settings - removed */}
 
-        {/* Upload Method Toggle */}
+        {/* Upload Method Toggle simplified to File only */}
         <div className="space-y-4">
-          <Label className="crypto-text-primary">Choose Upload Method</Label>
+          <Label className="crypto-text-primary">Upload Method</Label>
           <div className="flex gap-2 p-1 bg-muted rounded-lg">
-            <Button
-              variant={state.uploadMethod === "file" ? "crypto" : "cryptoGhost"}
-              size="sm"
-              onClick={() => updateState({ uploadMethod: "file" })}
-              className="flex-1"
-            >
+            <Button variant="crypto" size="sm" className="flex-1">
               <Upload className="w-4 h-4 mr-2" />
               Upload File
-            </Button>
-            <Button
-              variant={state.uploadMethod === "url" ? "crypto" : "cryptoGhost"}
-              size="sm"
-              onClick={() => updateState({ uploadMethod: "url" })}
-              className="flex-1"
-            >
-              <Link className="w-4 h-4 mr-2" />
-              YouTube URL
             </Button>
           </div>
         </div>
@@ -106,39 +72,7 @@ export const UploadSection = ({
         )}
 
         {/* YouTube URL Section */}
-        {state.uploadMethod === "url" && (
-          <div className="space-y-4">
-            <Label htmlFor="youtube-url" className="crypto-text-primary">YouTube Video URL</Label>
-            <div className="space-y-3">
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Input
-                  id="youtube-url"
-                  type="url"
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  value={state.youtubeUrl}
-                  onChange={(e) => updateState({ youtubeUrl: e.target.value })}
-                  className="flex-1 crypto-input"
-                  disabled={videoDownloading || state.isUploading}
-                />
-                <Button
-                  onClick={handlers.handleYouTubeUrlDownload}
-                  disabled={!state.youtubeUrl.trim() || videoDownloading || state.isUploading}
-                  className="sm:w-auto w-full crypto-button-primary"
-                >
-                  Download Video
-                </Button>
-              </div>
-              <div className="text-sm crypto-text-secondary">
-                Enter a YouTube video URL to download and process it automatically
-              </div>
-              {downloadError && (
-                <div className="text-sm crypto-loss bg-loss/10 p-2 rounded crypto-glow">
-                  {downloadError}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        {/* URL download removed */}
 
         {/* Progress Indicators */}
         {state.isUploading && (
@@ -160,6 +94,8 @@ export const UploadSection = ({
             <Progress value={downloadProgress} className="crypto-progress" />
           </div>
         )}
+
+        {/* All-in-One CTA moved to Title section */}
       </CardContent>
     </Card>
   )

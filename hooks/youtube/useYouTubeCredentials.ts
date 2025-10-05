@@ -142,12 +142,7 @@ export default function useYouTubeCredentials() {
         lastChecked: Date.now(),
       }))
 
-      if (showSuccessToast && hasValidCredentials) {
-        toast({ 
-          title: 'YouTube Credentials Found', 
-          description: 'YouTube token is available and valid.' 
-        })
-      }
+      // Suppress success toast to keep flow seamless (login -> loading -> dashboard)
 
       return response.data || null
 

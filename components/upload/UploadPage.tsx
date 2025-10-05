@@ -64,6 +64,7 @@ export default function UploadPage() {
     uploadToYouTube,
     resetYouTubeUploadState,
     downloadVideo,
+    processAllInOne,
   } = uploadPageData
 
   const handlers = useUploadHandlers({
@@ -73,6 +74,7 @@ export default function UploadPage() {
     uploadVideo,
     resetUploadState,
     downloadVideo,
+    processAllInOne,
     generateTitles,
     generateDescriptionAPI,
     regenerateDescriptionWithTemplate,

@@ -125,32 +125,26 @@ export default function useVideos() {
         }
       })
       
+      const apiPayload = response.data
+      const uploadedVideo: any = apiPayload?.data?.video || apiPayload
+
       console.log('[Video][Upload] Response', {
         status: response.status,
         statusText: response.statusText,
         headers: response.headers,
-        fullResponseData: response.data,
-        keys: Object.keys(response.data || {}),
-        id: response.data?.id,
-        userId: response.data?.user_id,
-        videoPath: response.data?.video_path,
-        youtubeVideoId: response.data?.youtube_video_id,
-        transcript: response.data?.transcript,
-        title: response.data?.title,
-        timestamps: response.data?.timestamps,
-        description: response.data?.description,
-        thumbnailPath: response.data?.thumbnail_path,
-        thumbnailUrl: response.data?.thumbnail_url,
-        createdAt: response.data?.created_at,
+        keys: Object.keys(apiPayload || {}),
+        topLevelKeys: Object.keys(apiPayload?.data || {}),
+        videoId: uploadedVideo?.id,
+        videoPath: uploadedVideo?.video_path,
       })
 
       // Print the complete response in a formatted way
       console.log('=== COMPLETE VIDEO UPLOAD RESPONSE ===')
       console.log('Status:', response.status)
-      console.log('Video ID (UUID):', response.data?.id)
-      console.log('User ID:', response.data?.user_id)
-      console.log('Video Path:', response.data?.video_path)
-      console.log('Data:', JSON.stringify(response.data, null, 2))
+      console.log('Video ID (UUID):', uploadedVideo?.id)
+      console.log('User ID:', uploadedVideo?.user_id)
+      console.log('Video Path:', uploadedVideo?.video_path)
+      console.log('Data:', JSON.stringify(uploadedVideo, null, 2))
       console.log('===========================================')
 
       // Clear the progress interval
@@ -169,15 +163,15 @@ export default function useVideos() {
       }
 
       // Save video data to localStorage for persistence across page refreshes
-      if (response.data) {
-        console.log('📝 Video ID from upload response:', response.data.id)
-        console.log('📝 Full response data:', response.data)
+      if (uploadedVideo) {
+        console.log('📝 Video ID from upload response:', uploadedVideo.id)
+        console.log('📝 Video object:', uploadedVideo)
         
-        localStorage.setItem('current_video_data', JSON.stringify(response.data))
-        localStorage.setItem('current_video_id', response.data.id)
+        localStorage.setItem('current_video_data', JSON.stringify(uploadedVideo))
+        localStorage.setItem('current_video_id', uploadedVideo.id)
         
         console.log('💾 Video data saved to localStorage:', {
-          video_id: response.data.id,
+          video_id: uploadedVideo.id,
           localStorage_key: 'current_video_data',
           localStorage_video_id_key: 'current_video_id'
         })
@@ -196,7 +190,8 @@ export default function useVideos() {
         description: `Video "${file.name}" uploaded successfully.` 
       })
       
-      return response.data
+      // Return the normalized video object matching VideoUploadResponse
+      return uploadedVideo as VideoUploadResponse
     } catch (error: any) {
       // Clear the progress interval on error
       clearInterval(progressInterval)

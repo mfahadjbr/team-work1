@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Play, Eye, EyeOff, Loader2 } from "lucide-react"
 import useAuth from "@/hooks/auth/useAuth"
+import useYouTubeCredentials from "@/hooks/youtube/useYouTubeCredentials"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -21,6 +22,7 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const router = useRouter()
   const { login } = useAuth()
+  const { checkYouTubeCredentials } = useYouTubeCredentials()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -32,13 +34,16 @@ export default function LoginPage() {
         email,
         password,
       })
-
-      // Redirect to credential page after successful login
-      router.push("/auth/credential")
+      // After login, silently check YouTube credentials and route accordingly
+      try {
+        const result: any = await checkYouTubeCredentials(false)
+        const hasValidToken = !!result && result.success === true && !!result.data && !!result.data.access_token
+        router.push(hasValidToken ? "/dashboard" : "/auth/credential")
+      } catch {
+        router.push("/auth/credential")
+      }
     } catch (err: any) {
       setError(err.message || "Login failed. Please check your credentials.")
-    } finally {
-      setIsLoading(false)
     }
   }
 

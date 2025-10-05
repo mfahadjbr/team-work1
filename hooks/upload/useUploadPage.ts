@@ -217,5 +217,42 @@ export const useUploadPage = () => {
     uploadToYouTube,
     resetYouTubeUploadState,
     downloadVideo,
+    // New: all-in-one processing
+    processAllInOne: async (videoId: string) => {
+      try {
+        const token = localStorage.getItem('auth_token')
+        if (!token) throw new Error('No authentication token found')
+        const url = `https://saas-backend.duckdns.org/all-in-one/${videoId}/process`
+        console.log('[AllInOne] Request', {
+          url,
+          videoId,
+          hasToken: !!token,
+          headersPreview: { Authorization: 'Bearer ***', accept: 'application/json' }
+        })
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'accept': 'application/json' },
+        })
+        console.log('[AllInOne] Response meta', { status: res.status, ok: res.ok })
+        const data = await res.json()
+        console.log('[AllInOne] Response data', {
+          success: data?.success,
+          message: data?.message,
+          video_id: data?.video_id,
+          total_tasks: data?.total_tasks,
+          completed_tasks: data?.completed_tasks,
+          failed_tasks: data?.failed_tasks,
+          titlesCount: data?.results?.titles?.generated_titles?.length,
+          hasDescription: !!data?.results?.description?.generated_description,
+          thumbnailsCount: data?.results?.thumbnails?.generated_thumbnails?.length,
+        })
+        // Store into state for preview section to use
+        setState(prev => ({ ...prev, allInOneResult: data }))
+        return data
+      } catch (e) {
+        console.error('[AllInOne] Error', e)
+        return { success: false, message: (e as any)?.message || 'Failed to process' }
+      }
+    },
   }
 }

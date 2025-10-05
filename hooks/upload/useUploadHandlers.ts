@@ -20,10 +20,12 @@ interface UseUploadHandlersProps {
   uploadToYouTube: any
   resetYouTubeUploadState: any
   getCurrentVideoId: any
+  getVideoPreview: any
   previewData: any
   uploadedVideoData: any
   privacyError: string | null
   uploadError: string | null
+  processAllInOne?: (videoId: string) => Promise<any>
 }
 
 export const useUploadHandlers = ({
@@ -43,10 +45,12 @@ export const useUploadHandlers = ({
   uploadToYouTube,
   resetYouTubeUploadState,
   getCurrentVideoId,
+  getVideoPreview,
   previewData,
   uploadedVideoData,
   privacyError,
   uploadError,
+  processAllInOne,
 }: UseUploadHandlersProps): UploadHandlers => {
 
   const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,7 +74,8 @@ export const useUploadHandlers = ({
         updateState({
           uploadedVideoData: result,
           uploadProgress: 100,
-          showCelebration: true
+          showCelebration: true,
+          currentStep: "title"
         })
         
         console.log('=== VIDEO UPLOAD SUCCESS ===')
@@ -405,6 +410,34 @@ export const useUploadHandlers = ({
     }
   }, [state.geminiApiKey, updateState])
 
+  const handleAllInOne = useCallback(async () => {
+    try {
+      const idFromStorage = getCurrentVideoId()
+      const fallbackId = uploadedVideoData?.id || previewData?.id
+      const videoId = idFromStorage || fallbackId
+      console.log('[AllInOne][Handlers] IDs', {
+        idFromStorage,
+        uploadedVideoDataId: uploadedVideoData?.id,
+        previewDataId: previewData?.id,
+        chosen: videoId,
+      })
+      if (!videoId) {
+        toast({ title: 'Upload Required', description: 'Please upload a video first.' })
+        return
+      }
+      if (processAllInOne) {
+        const result = await processAllInOne(videoId)
+        console.log('[AllInOne][Handlers] API result', result)
+      }
+      updateState({ currentStep: 'preview', previewStage: 3, showFinalPreview: true })
+      if (getVideoPreview) {
+        await getVideoPreview(videoId)
+      }
+    } catch (e) {
+      console.error('All-in-one failed', e)
+    }
+  }, [uploadedVideoData, getCurrentVideoId, processAllInOne, updateState, getVideoPreview, toast])
+
   return {
     handleFileUpload,
     handleYouTubeUrlDownload,
@@ -415,5 +448,6 @@ export const useUploadHandlers = ({
     handlePublish,
     handlePlaylistSelection,
     handleSaveApiKey,
+    handleAllInOne,
   }
 }

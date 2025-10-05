@@ -19,7 +19,7 @@ const useVideos = () => {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`https://saas-backend.duckdns.org/dashboard/videos?refresh=${refresh}`, {
+      const response = await fetch(`https://saas-backend.duckdns.org/videos/my-videos`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'accept': 'application/json',
@@ -31,7 +31,62 @@ const useVideos = () => {
         throw new Error(errorData.message || 'Failed to fetch dashboard videos');
       }
 
-      const result: DashboardVideosResponse = await response.json();
+      const raw = await response.json();
+      const videos = Array.isArray(raw?.data?.videos) ? raw.data.videos : [];
+
+      // Map backend uploads to dashboard video shape with safe defaults
+      const mappedVideos = videos.map((v: any) => {
+        const publishedAt = v.published_at || v.created_at || new Date().toISOString();
+        const youtubeId = v.youtube_video_id || v.video_id || null;
+        const daysSince = (() => {
+          const then = new Date(publishedAt).getTime();
+          const now = Date.now();
+          const diffDays = Math.floor((now - then) / (1000 * 60 * 60 * 24));
+          return Number.isFinite(diffDays) ? diffDays : 0;
+        })();
+
+        return {
+          video_id: youtubeId || v.id || String(Math.random()),
+          title: v.title || "Untitled",
+          description: v.description || "",
+          published_at: publishedAt,
+          thumbnail_url: v.thumbnail_url || "",
+          channel_title: "",
+          tags: [],
+          view_count: v.view_count ?? 0,
+          like_count: v.like_count ?? 0,
+          comment_count: v.comment_count ?? 0,
+          duration: v.duration || "PT0S",
+          duration_seconds: v.duration_seconds ?? 0,
+          privacy_status: v.privacy_status || v.video_status || "private",
+          analytics: {
+            view_count: v.view_count ?? 0,
+            like_count: v.like_count ?? 0,
+            comment_count: v.comment_count ?? 0,
+            duration: v.duration || "PT0S",
+            duration_seconds: v.duration_seconds ?? 0,
+            privacy_status: v.privacy_status || v.video_status || "private",
+            published_at: publishedAt,
+            title: v.title || "Untitled",
+            description: v.description || "",
+            tags: [],
+            category_id: "",
+            default_language: null as any,
+            default_audio_language: null as any,
+          },
+          engagement_rate: v.engagement_rate ?? 0,
+          performance_score: v.performance_score ?? 0,
+          days_since_published: daysSince,
+        };
+      });
+
+      const result: DashboardVideosResponse = {
+        success: !!raw?.success,
+        message: raw?.message || "",
+        data: mappedVideos,
+        count: mappedVideos.length,
+      };
+
       setData(result);
     } catch (err: any) {
       setError(err.message);

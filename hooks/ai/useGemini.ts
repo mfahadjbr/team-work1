@@ -267,11 +267,47 @@ export default function useGemini() {
     }
   }, [getAuthHeaders, toast])
 
+  const deleteGeminiKey = useCallback(async (): Promise<{ success: boolean; message: string } | undefined> => {
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const headers = getAuthHeaders()
+      const url = '/gemini-keys/'
+
+      console.log('[Gemini][Delete Key] Request', {
+        url: `${API_BASE_URL}${url}`,
+        hasAuthHeader: !!(headers as any)?.Authorization,
+      })
+
+      const res = await axiosInstance.delete(url, { headers })
+
+      // Clear localStorage
+      localStorage.removeItem('gemini_api_key')
+
+      toast({ title: 'API Key Deleted', description: 'Gemini API key deleted successfully.' })
+
+      return res.data
+    } catch (error: any) {
+      let errorMessage = 'Failed to delete API key'
+      if (axios.isAxiosError(error)) {
+        errorMessage = error.response?.data?.message || error.message || errorMessage
+      } else if (error?.message) {
+        errorMessage = error.message
+      }
+      setError(errorMessage)
+      toast({ title: 'Failed to delete API key', description: errorMessage })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [getAuthHeaders, toast])
+
   return {
     isLoading,
     error,
     saveGeminiKey,
     getGeminiKey,
     updateGeminiKey,
+    deleteGeminiKey,
   }
 }

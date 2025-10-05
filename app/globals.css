@@ -4,23 +4,23 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Crypto Theme Variables */
-  --brand-primary: #FD1D1D;
-  --brand-primary-dark: #E01B1B;
-  --brand-primary-light: #FF4444;
-  --brand-orange: #FF6B35;
-  --accent-red: #DC2626;
+  /* Theme Variables - Clean UI */
+  --brand-primary: #FF4747; /* Warm Red */
+  --brand-primary-dark: #FF6B6B;
+  --brand-primary-light: #FF6B6B;
+  --brand-orange: #FF6B6B;
+  --accent-red: #FF4747;
   
   /* Background Colors */
-  --bg-primary: #000000;
-  --bg-secondary: #111111;
-  --bg-tertiary: #1A1A1A;
-  --bg-card: #1E1E1E;
-  --bg-modal: #202020;
+  --bg-primary: #1A1A1A; /* Warm Charcoal */
+  --bg-secondary: #2C2C2C;
+  --bg-tertiary: #404040;
+  --bg-card: #242424; /* Darker Charcoal */
+  --bg-modal: #242424;
   
   /* Text Colors */
   --text-primary: #FFFFFF;
-  --text-secondary: #B3B3B3;
+  --text-secondary: #A0A0A0;
   --text-tertiary: #888888;
   --text-disabled: #555555;
   --text-inverse: #000000;
@@ -28,13 +28,13 @@
   /* Border Colors */
   --border-primary: #333333;
   --border-secondary: #444444;
-  --border-focus: #FD1D1D;
-  --border-error: #FF4444;
+  --border-focus: #FF4747;
+  --border-error: #FF6B6B;
   
-  /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #FD1D1D 0%, #E01B1B 100%);
-  --gradient-hero: linear-gradient(135deg, #FD1D1D 0%, #FF4444 50%, #FF6B35 100%);
-  --gradient-background: linear-gradient(180deg, #1A1A1A 0%, #2D1B1B 50%, #000000 100%);
+  /* Gradients (subtle/clean) */
+  --gradient-primary: linear-gradient(135deg, #FF4747 0%, #FF6B6B 100%);
+  --gradient-hero: linear-gradient(135deg, #1A1A1A 0%, #2C2C2C 100%);
+  --gradient-background: linear-gradient(180deg, #1A1A1A 0%, #1A1A1A 100%);
   
   /* Status Colors */
   --success: #10B981;
@@ -52,17 +52,17 @@
   --chart-line: #FD1D1D;
   
   /* Opacity Variants */
-  --brand-10: rgba(253, 29, 29, 0.1);
-  --brand-20: rgba(253, 29, 29, 0.2);
-  --brand-30: rgba(253, 29, 29, 0.3);
-  --brand-50: rgba(253, 29, 29, 0.5);
-  --brand-70: rgba(253, 29, 29, 0.7);
-  --brand-90: rgba(253, 29, 29, 0.9);
+  --brand-10: rgba(255, 71, 71, 0.1);
+  --brand-20: rgba(255, 71, 71, 0.2);
+  --brand-30: rgba(255, 71, 71, 0.3);
+  --brand-50: rgba(255, 71, 71, 0.5);
+  --brand-70: rgba(255, 71, 71, 0.7);
+  --brand-90: rgba(255, 71, 71, 0.9);
   
-  /* Animation Colors */
-  --glow-effect: 0 0 20px rgba(253, 29, 29, 0.5);
-  --box-shadow: 0 4px 20px rgba(253, 29, 29, 0.3);
-  --hover-glow: 0 0 30px rgba(253, 29, 29, 0.7);
+  /* Animation/Glow - disabled for clean UI */
+  --glow-effect: none;
+  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  --hover-glow: none;
   
   /* Component Colors */
   --navbar-bg: rgba(0, 0, 0, 0.9);
@@ -187,7 +187,7 @@
   
   body {
     @apply bg-background text-foreground;
-    background: var(--gradient-background);
+    background: var(--bg-primary);
     min-height: 100vh;
   }
   
@@ -196,26 +196,17 @@
   }
   
   /* Crypto Theme Base Styles */
-  .crypto-gradient-bg {
-    background: var(--gradient-background);
-  }
+  .crypto-gradient-bg { background: var(--bg-primary); }
   
-  .crypto-hero-gradient {
-    background: var(--gradient-hero);
-  }
+  .crypto-hero-gradient { background: var(--bg-secondary); }
   
   .crypto-primary-gradient {
     background: var(--gradient-primary);
   }
   
-  .crypto-glow {
-    box-shadow: var(--glow-effect);
-  }
+  .crypto-glow { box-shadow: none; }
   
-  .crypto-hover-glow:hover {
-    box-shadow: var(--hover-glow);
-    transition: box-shadow 0.3s ease-in-out;
-  }
+  .crypto-hover-glow:hover { box-shadow: none; }
   
   .crypto-card {
     background: var(--bg-card);
@@ -224,10 +215,7 @@
     transition: all 0.3s ease-in-out;
   }
   
-  .crypto-card:hover {
-    box-shadow: var(--hover-glow);
-    transform: translateY(-2px);
-  }
+  .crypto-card:hover { box-shadow: var(--box-shadow); transform: none; }
   
   .crypto-button-primary {
     background: var(--brand-primary);
@@ -236,11 +224,7 @@
     transition: all 0.3s ease-in-out;
   }
   
-  .crypto-button-primary:hover {
-    background: var(--brand-primary-dark);
-    box-shadow: var(--hover-glow);
-    transform: translateY(-1px);
-  }
+  .crypto-button-primary:hover { background: var(--brand-primary-dark); box-shadow: none; transform: none; }
   
   .crypto-button-secondary {
     background: transparent;
@@ -249,11 +233,7 @@
     transition: all 0.3s ease-in-out;
   }
   
-  .crypto-button-secondary:hover {
-    background: var(--brand-primary);
-    color: var(--text-primary);
-    box-shadow: var(--hover-glow);
-  }
+  .crypto-button-secondary:hover { background: var(--brand-primary); color: var(--text-primary); box-shadow: none; }
   
   .crypto-button-ghost {
     background: var(--brand-10);
@@ -262,10 +242,7 @@
     transition: all 0.3s ease-in-out;
   }
   
-  .crypto-button-ghost:hover {
-    background: var(--brand-20);
-    box-shadow: var(--glow-effect);
-  }
+  .crypto-button-ghost:hover { background: var(--brand-20); box-shadow: none; }
   
   .crypto-input {
     background: var(--bg-tertiary);
@@ -274,11 +251,7 @@
     transition: all 0.3s ease-in-out;
   }
   
-  .crypto-input:focus {
-    border-color: var(--brand-primary);
-    box-shadow: 0 0 0 2px var(--brand-20);
-    outline: none;
-  }
+  .crypto-input:focus { border-color: var(--brand-primary); box-shadow: none; outline: none; }
   
   .crypto-text-primary {
     color: var(--text-primary);
@@ -324,9 +297,7 @@
     transition: color 0.3s ease-in-out;
   }
   
-  .crypto-footer a:hover {
-    color: var(--brand-primary);
-  }
+  .crypto-footer a:hover { color: var(--brand-primary); }
   
   /* Crypto Animations */
   @keyframes crypto-pulse {
@@ -378,33 +349,17 @@
   }
   
   /* Crypto Animation Classes */
-  .crypto-pulse {
-    animation: crypto-pulse 2s ease-in-out infinite;
-  }
+  .crypto-pulse { animation: none; }
   
-  .crypto-glow-pulse {
-    animation: crypto-glow-pulse 3s ease-in-out infinite;
-  }
+  .crypto-glow-pulse { animation: none; }
   
-  .crypto-gradient-animated {
-    background-size: 200% 200%;
-    animation: crypto-gradient-shift 4s ease infinite;
-  }
+  .crypto-gradient-animated { background-size: auto; animation: none; }
   
   .crypto-float {
     animation: crypto-float 3s ease-in-out infinite;
   }
   
-  .crypto-shimmer {
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(253, 29, 29, 0.4),
-      transparent
-    );
-    background-size: 200% 100%;
-    animation: crypto-shimmer 2s infinite;
-  }
+  .crypto-shimmer { background: none; animation: none; }
   
   /* Enhanced Crypto Card Effects */
   .crypto-card-enhanced {
@@ -416,66 +371,13 @@
     overflow: hidden;
   }
   
-  .crypto-card-enhanced::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(253, 29, 29, 0.1),
-      transparent
-    );
-    transition: left 0.5s;
-  }
-  
-  .crypto-card-enhanced:hover::before {
-    left: 100%;
-  }
-  
-  .crypto-card-enhanced:hover {
-    box-shadow: var(--hover-glow);
-    transform: translateY(-3px);
-    border-color: var(--brand-primary);
-  }
+  .crypto-card-enhanced::before { content: none; }
+  .crypto-card-enhanced:hover { box-shadow: var(--box-shadow); transform: none; border-color: var(--border-primary); }
   
   /* Crypto Button Enhancements */
-  .crypto-button-enhanced {
-    position: relative;
-    overflow: hidden;
-    background: var(--gradient-primary);
-    border: 1px solid var(--brand-primary);
-    color: var(--text-primary);
-    transition: all 0.3s ease-in-out;
-  }
-  
-  .crypto-button-enhanced::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.2),
-      transparent
-    );
-    transition: left 0.5s;
-  }
-  
-  .crypto-button-enhanced:hover::before {
-    left: 100%;
-  }
-  
-  .crypto-button-enhanced:hover {
-    box-shadow: var(--hover-glow);
-    transform: translateY(-2px);
-  }
+  .crypto-button-enhanced { position: relative; overflow: hidden; background: var(--brand-primary); border: 1px solid var(--brand-primary); color: var(--text-primary); }
+  .crypto-button-enhanced::before { content: none; }
+  .crypto-button-enhanced:hover { box-shadow: none; transform: none; }
   
   /* Crypto Loading Spinner */
   .crypto-spinner {
@@ -555,24 +457,14 @@
   }
   
   /* Crypto Data Visualization */
-  .crypto-chart-line {
-    stroke: var(--chart-line);
-    stroke-width: 3;
-    fill: none;
-    filter: drop-shadow(0 0 6px rgba(253, 29, 29, 0.3));
-  }
+  .crypto-chart-line { stroke: var(--chart-line); stroke-width: 3; fill: none; filter: none; }
   
   .crypto-chart-area {
     fill: url(#crypto-gradient);
     opacity: 0.3;
   }
   
-  .crypto-chart-point {
-    fill: var(--brand-primary);
-    stroke: var(--text-primary);
-    stroke-width: 2;
-    filter: drop-shadow(0 0 4px rgba(253, 29, 29, 0.5));
-  }
+  .crypto-chart-point { fill: var(--brand-primary); stroke: var(--text-primary); stroke-width: 2; filter: none; }
   
   /* Smooth scrolling for main content */
   .overflow-y-auto {

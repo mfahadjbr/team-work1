@@ -61,14 +61,24 @@ export function TitleSection({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <Button 
-          onClick={handlers.generateTitlesHandler} 
-          disabled={state.isProcessing || titleLoading} 
-          className="w-full crypto-button-primary"
-        >
-          <Sparkles className="w-4 h-4 mr-2" />
-          Generate Title with AI
-        </Button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <Button 
+            onClick={handlers.generateTitlesHandler} 
+            disabled={state.isProcessing || titleLoading} 
+            className="w-full crypto-button-primary"
+          >
+            <Sparkles className="w-4 h-4 mr-2" />
+            Generate Title with AI
+          </Button>
+          {state.uploadedVideoData?.id && (
+            <Button 
+              onClick={handlers.handleAllInOne as any}
+              className="w-full"
+            >
+              Create All-in-One
+            </Button>
+          )}
+        </div>
 
         {(state.content.titles.length > 0 || generatedTitles.length > 0) && (
           <div className="space-y-3">

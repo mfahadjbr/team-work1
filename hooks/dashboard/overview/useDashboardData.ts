@@ -143,183 +143,29 @@ export interface DashboardOverviewResponse {
   success: boolean;
   message: string;
   data: {
-    channel_info: {
-      title: string;
-      description: string;
-      subscriber_count: number;
-      total_views: number;
-      total_videos: number;
-      total_likes: number;
-      total_comments: number;
-      total_duration: number;
-      created_at: string;
-      thumbnail_url: string;
-      country: string;
-      custom_url: string;
-      keywords: string;
-      featured_channels_title: string;
-      featured_channels_urls: string[];
+    total_videos: number;
+    total_views: number;
+    subscriber_count: number;
+    engagement_rate: number;
+    monetization_progress: {
+      watch_time_hours: number;
+      monetization_eligible: boolean;
+      subscriber_progress_percentage: number;
+      watch_time_progress_percentage: number;
+      requirements: {
+        subscriber_requirement: number;
+        watch_time_requirement: number;
+      };
     };
-    performance_metrics: {
-      avg_views_per_video: number;
-      avg_likes_per_video: number;
-      avg_comments_per_video: number;
-      avg_duration_per_video: number;
-      overall_engagement_rate: number;
-      videos_per_month: number;
-      views_per_month: number;
-      subscribers_per_month: number;
-      days_since_created: number;
-      channel_age_months: number;
-    };
-    recent_performance: {
-      recent_videos_count: number;
-      recent_views: number;
-      recent_likes: number;
-      recent_comments: number;
-      recent_engagement_rate: number;
-      recent_avg_views: number;
-    };
-    top_performing_content: {
-      top_videos_by_views: Array<{
-        video_id: string;
-        title: string;
-        views: number;
-        likes: number;
-        comments: number;
-        published_at: string;
-        duration: string;
-        engagement_rate: number;
-      }>;
-      top_videos_by_engagement: Array<{
-        video_id: string;
-        title: string;
-        views: number;
-        likes: number;
-        comments: number;
-        published_at: string;
-        duration: string;
-        engagement_rate: number;
-      }>;
-    };
-    monthly_analytics: {
-      chart_data: Array<{
-        month: string;
-        videos: number;
-        views: number;
-        likes: number;
-        comments: number;
-        duration: number;
-        engagement_rate: number;
-      }>;
-      total_months: number;
-      best_month: any;
-      worst_month: any;
-    };
-    content_analysis: {
-      top_categories: any[];
+    content_distributions: {
       view_distribution: {
-        "0-100": number;
-        "101-500": number;
-        "501-1000": number;
-        "1001-5000": number;
-        "5000+": number;
+        total_views: number;
+        avg_views_per_day: number;
       };
-      total_categories: number;
-      most_used_tag: string | null;
-    };
-    growth_insights: {
-      subscriber_growth_rate: number;
-      view_growth_rate: number;
-      video_upload_frequency: number;
-      engagement_growth: number;
-    };
-    channel_status: {
-      is_active: boolean;
-      engagement_level: string;
-      growth_stage: string;
-      content_quality: string;
-      upload_consistency: string;
-    };
-    summary_stats: {
-      total_watch_time_hours: number;
-      avg_video_length_minutes: number;
-      total_interactions: number;
-      interaction_rate: number;
-      subscriber_to_view_ratio: number;
-    };
-    advanced_analytics: {
       duration_distribution: {
-        "0-5min": number;
-        "5-15min": number;
-        "15-30min": number;
-        "30-60min": number;
-        "60min+": number;
+        avg_duration_seconds: number;
+        total_watch_time_minutes: number;
       };
-      engagement_distribution: {
-        "0-1%": number;
-        "1-3%": number;
-        "3-5%": number;
-        "5-10%": number;
-        "10%+": number;
-      };
-      content_type_breakdown: {
-        shorts: number;
-        tutorials: number;
-        lectures: number;
-        other: number;
-      };
-      retention_analysis: {
-        high_retention_videos: number;
-        medium_retention_videos: number;
-        low_retention_videos: number;
-        avg_retention_rate: number;
-      };
-      growth_trajectory: {
-        trending_up: number;
-        stable: number;
-        trending_down: number;
-        new_content: number;
-      };
-    };
-    performance_scoring: {
-      top_videos_by_score: Array<{
-        video_id: string;
-        title: string;
-        score: number;
-        views: number;
-        likes: number;
-        comments: number;
-        duration_minutes: number;
-      }>;
-      avg_performance_score: number;
-      total_videos_scored: number;
-    };
-    weekly_analytics: {
-      weekly_data: {
-        [key: string]: {
-          videos: number;
-          views: number;
-          likes: number;
-          comments: number;
-          engagement_rate: number;
-        };
-      };
-      weekly_trend: string;
-      best_week: [string, any];
-      most_engaging_week: [string, any];
-    };
-    content_insights: {
-      most_effective_content_type: string;
-      optimal_video_length: string;
-      engagement_sweet_spot: string;
-      content_recommendations: string[];
-    };
-    competitive_analysis: {
-      channel_health_score: number;
-      growth_potential: string;
-      audience_loyalty: string;
-      content_consistency: string;
     };
   };
 }
@@ -331,20 +177,16 @@ const useDashboardOverview = () => {
 
   const fetchDashboardOverview = async (refresh: boolean = false) => {
     try {
-      console.log("🏠 Starting dashboard overview fetch...", { refresh });
       setIsLoading(true);
       setError(null);
 
       const token = localStorage.getItem('auth_token')
-      console.log("🎫 Token exists:", !!token);
-
       if (!token) {
         throw new Error("No authentication token found");
       }
 
-      console.log("📡 Making API call to dashboard overview endpoint");
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://saas-backend.duckdns.org";
-      const response = await fetch(`${API_BASE_URL}/dashboard/overview?refresh=${refresh}`, {
+      const response = await fetch(`${API_BASE_URL}/dashboard-overview/?refresh=${refresh}`, {
         method: "GET",
         headers: {
           "accept": "application/json",
@@ -352,33 +194,25 @@ const useDashboardOverview = () => {
         },
       });
 
-      console.log("📋 API Response status:", response.status);
-      console.log("📊 Response ok:", response.ok);
-      console.log("📊 Response:", response);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result: DashboardOverviewResponse = await response.json();
-      console.log("🎬 Dashboard overview data received:", result);
-
       if (result.success) {
         setData(result);
-        console.log("✅ Dashboard overview data set successfully");
       } else {
         throw new Error(result.message || "Failed to fetch dashboard overview");
       }
     } catch (err) {
-      console.error("❌ Dashboard overview fetch error:", err);
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
-      console.log("🏁 Dashboard overview fetch completed");
     }
   };
 
   useEffect(() => {
-    fetchDashboardOverview(false); // Initial load with refresh=false
+    fetchDashboardOverview(false);
   }, []);
 
   return {
@@ -386,7 +220,7 @@ const useDashboardOverview = () => {
     overviewData: data?.data || null,
     isLoading,
     error,
-    refetch: () => fetchDashboardOverview(true) // Refresh with refresh=true
+    refetch: () => fetchDashboardOverview(true)
   };
 };
 

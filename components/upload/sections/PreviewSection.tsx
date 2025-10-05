@@ -66,6 +66,18 @@ export function PreviewSection({
     }
   }
 
+  const handleAllInOne = async () => {
+    const videoId = uploadedVideoData?.id || getCurrentVideoId()
+    if (!videoId) return
+    // @ts-ignore add handler injected via handlers if present
+    if ((handlers as any).processAllInOne) {
+      await (handlers as any).processAllInOne(videoId)
+      // Move to final preview and refresh preview data
+      updateState({ previewStage: 3, showFinalPreview: true })
+      await getVideoPreview(videoId)
+    }
+  }
+
   const handleStageNavigation = (stage: 1 | 2 | 3) => {
     updateState({ previewStage: stage })
     
@@ -360,6 +372,9 @@ export function PreviewSection({
                 >
                   Continue to Preview
                 </Button>
+                <Button onClick={handleAllInOne} className="ml-2">
+                  Create All-in-One
+                </Button>
               </div>
             </div>
           </>
@@ -414,9 +429,22 @@ export function PreviewSection({
                   </div>
                 )}
 
-                {/* Final Preview - Only Important Content */}
+                {/* Final Preview - Only Important Content */
+                }
                 {!previewLoading && !previewError && (
                   <div className="space-y-6">
+                    {/* All-in-One Result (if present) */}
+                    {state.allInOneResult && (
+                      <div className="border rounded-xl p-6 crypto-card border-primary/30 shadow-sm">
+                        <h3 className="text-xl font-semibold mb-4 crypto-text-primary">All-in-One Summary</h3>
+                        <div className="text-sm text-muted-foreground mb-2">{state.allInOneResult.message}</div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                          <div>Total tasks: <span className="font-medium">{state.allInOneResult.total_tasks}</span></div>
+                          <div>Completed: <span className="font-medium">{state.allInOneResult.completed_tasks}</span></div>
+                          <div>Failed: <span className="font-medium">{state.allInOneResult.failed_tasks}</span></div>
+                        </div>
+                      </div>
+                    )}
                     
                     {/* Video Title */}
                     <div className="space-y-3">
@@ -426,7 +454,7 @@ export function PreviewSection({
                       </Label>
                       <div className="p-6 border rounded-xl crypto-card border-primary/30 shadow-sm">
                         <h3 className="font-semibold text-xl crypto-text-primary">
-                          {previewData?.title || state.content.selectedTitle || state.customTitle || 'No title generated'}
+                          {previewData?.title || state.content.selectedTitle || (state.allInOneResult?.results?.titles?.generated_titles?.[0]) || state.customTitle || 'No title generated'}
                         </h3>
                       </div>
                     </div>
@@ -464,9 +492,9 @@ export function PreviewSection({
                         Video Description
                       </Label>
                       <div className="border rounded-xl p-6 crypto-card border-primary/30 shadow-sm max-h-60 overflow-y-auto">
-                        {(previewData?.description || state.content.description || state.customDescription) ? (
+                        {(previewData?.description || state.content.description || state.allInOneResult?.results?.description?.generated_description || state.customDescription) ? (
                           <pre className="text-sm whitespace-pre-wrap leading-relaxed crypto-text-primary">
-                            {previewData?.description || state.content.description || state.customDescription}
+                            {previewData?.description || state.content.description || state.allInOneResult?.results?.description?.generated_description || state.customDescription}
                           </pre>
                         ) : (
                           <div className="text-center py-8">
@@ -484,9 +512,9 @@ export function PreviewSection({
                         Video Timestamps
                       </Label>
                       <div className="border rounded-xl p-6 crypto-card border-primary/30 shadow-sm max-h-60 overflow-y-auto">
-                        {(previewData?.timestamps || state.content.timestamps || state.customTimestamps) ? (
+                        {(previewData?.timestamps || state.content.timestamps || (state.allInOneResult?.results?.timestamps?.generated_timestamps?.map((t: any) => `${t.time} ${t.title}`).join("\n")) || state.customTimestamps) ? (
                           <pre className="text-sm whitespace-pre-wrap font-mono leading-relaxed crypto-text-primary">
-                            {previewData?.timestamps || state.content.timestamps || state.customTimestamps}
+                            {previewData?.timestamps || state.content.timestamps || (state.allInOneResult?.results?.timestamps?.generated_timestamps?.map((t: any) => `${t.time} ${t.title}`).join("\n")) || state.customTimestamps}
                           </pre>
                         ) : (
                           <div className="text-center py-8">

@@ -1,12 +1,11 @@
 "use client"
-
-import { useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { List, RefreshCw, Eye, ThumbsUp, MessageCircle, Video, Clock, TrendingUp, TrendingDown, BarChart3 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import usePlaylistAnalytics from "@/hooks/dashboard/playlists/usePlaylistAnalytics"
+import usePlaylistVideos from "@/hooks/dashboard/playlists/usePlaylistVideos"
 import RefreshButton from "@/components/ui/refresh-button"
 import Link from "next/link"
   
@@ -68,7 +67,6 @@ const growthIcon = (trend?: string) => {
 export default function PlaylistsPage() {
   const searchParams = useSearchParams()
   const playlistId = searchParams.get('id')
-  const [showAll, setShowAll] = useState(false)
   
   if (!playlistId) {
     return (
@@ -91,6 +89,11 @@ export default function PlaylistsPage() {
 
 function PlaylistData({ playlistId }: { playlistId: string }) {
   const { playlistData, isLoading, error, refetch } = usePlaylistAnalytics(playlistId)
+  const { 
+    playlistData: playlistVideos, 
+    isLoading: isVideosLoading, 
+    error: videosError 
+  } = usePlaylistVideos(playlistId)
 
   if (isLoading) {
     return (
@@ -114,21 +117,22 @@ function PlaylistData({ playlistId }: { playlistId: string }) {
   }
 
   const playlist = playlistData.data.analytics
-  const playlistInfo = playlistData.data.playlist_info
+  const playlistName = (playlistData.data as any).playlist_name || (playlistData.data as any)?.playlist_info?.title || "Playlist"
+  const playlistIdForLink = (playlistData.data as any).playlist_id || (playlistData.data as any)?.playlist_info?.playlist_id || playlistId
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{playlistInfo.title}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{playlistName}</h1>
           <p className="text-muted-foreground mt-2 text-sm sm:text-base">
             Playlist Analytics and Performance Overview
           </p>
         </div>
         <div className="flex justify-end gap-2">
           <Button asChild size="sm">
-            <Link href={`/dashboard/playlists/${playlistInfo.playlist_id}?view=all`}>
+            <Link href={`/dashboard/playlists/${playlistIdForLink}?view=all`}>
               View all videos
             </Link>
           </Button>
@@ -268,6 +272,67 @@ function PlaylistData({ playlistId }: { playlistId: string }) {
               </Card>
             )}
       
+      {/* Playlist Videos */}
+      <Card className="mt-4">
+        <CardContent className="p-4">
+          {isVideosLoading ? (
+            <div className="flex items-center justify-center py-10 text-muted-foreground">Loading playlist videos...</div>
+          ) : videosError ? (
+            <div className="flex items-center justify-center py-10 text-red-600">{videosError}</div>
+          ) : !playlistVideos?.data?.length ? (
+            <div className="flex items-center justify-center py-10 text-muted-foreground">No videos found in this playlist.</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {playlistVideos.data.map((v) => (
+                <Card key={v.video_id} className="overflow-hidden hover:shadow-md transition-shadow">
+                  <CardContent className="p-0">
+                    <div className="relative">
+                      <img src={v.thumbnail_url || "/placeholder.svg"} alt={v.title} className="w-full h-44 object-cover" />
+                      <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 rounded text-xs">
+                        {(function formatDur(d: string){
+                          if (!d || d === "PT0S") return "0:00"
+                          const m = d.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/)
+                          if (!m) return d
+                          const h = parseInt(m[1] || "0")
+                          const mi = parseInt(m[2] || "0")
+                          const s = parseInt(m[3] || "0")
+                          return h > 0 ? `${h}:${mi.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}` : `${mi}:${s.toString().padStart(2,"0")}`
+                        })(v.duration)}
+                      </div>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      <h4 className="font-semibold text-sm line-clamp-2">{v.title}</h4>
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="font-medium">{v.view_count.toLocaleString()}</div>
+                          <div className="text-muted-foreground">Views</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-medium">{v.like_count}</div>
+                          <div className="text-muted-foreground">Likes</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-medium">{v.comment_count}</div>
+                          <div className="text-muted-foreground">Comments</div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button asChild size="sm" className="flex-1 crypto-button-primary">
+                          <Link href={`/dashboard/videos/${v.video_id}`}>View Details</Link>
+                        </Button>
+                        <Button asChild size="sm" variant="outline">
+                          <a href={(v as any).youtube_video_url || (v as any).youtube_url || (v as any).url || '#'} target="_blank" rel="noreferrer">Watch</a>
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
     </div>
   )
 }

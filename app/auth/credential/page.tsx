@@ -48,7 +48,7 @@ export default function CredentialPage() {
   // Auto-redirect to YouTube connect if credentials already exist
   useEffect(() => {
     if (hasCredentials && !isChecking) {
-      router.push('/auth/youtube-connect')
+      router.push('/dashboard')
     }
   }, [hasCredentials, isChecking, router])
 
@@ -121,53 +121,17 @@ export default function CredentialPage() {
   // Show loading while checking credentials
   if (isChecking) {
     return (
-      <div className="min-h-screen crypto-gradient-bg flex items-center justify-center p-3 sm:p-4">
-        {/* Logout Button - Top Right */}
-        <div className="fixed top-3 right-3 sm:top-4 sm:right-4 z-50">
-          <Button
-            onClick={logout}
-            variant="outline"
-            size="sm"
-            className="bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90 crypto-text-primary text-xs sm:text-sm"
-          >
-            <LogOut className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            <span className="hidden sm:inline">Back to Login</span>
-          </Button>
-        </div>
-        <div className="text-center space-y-3">
-          <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin crypto-profit mx-auto text-[#fd1d1d]" />
-          <p className="crypto-text-primary text-sm sm:text-base font-medium">Checking for existing credentials...</p>
-          <p className="crypto-text-secondary text-xs sm:text-sm">Please wait while we verify your setup</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[#fd1d1d]" />
       </div>
     )
   }
 
-  // Show credentials already exist message (briefly before redirect)
+  // If credentials exist, show only a loader (no success message)
   if (hasCredentials) {
     return (
-      <div className="min-h-screen crypto-gradient-bg flex items-center justify-center p-3 sm:p-4">
-        {/* Logout Button - Top Right */}
-        <div className="fixed top-3 right-3 sm:top-4 sm:right-4 z-50">
-          <Button
-            onClick={logout}
-            variant="outline"
-            size="sm"
-            className="bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90 crypto-text-primary text-xs sm:text-sm"
-          >
-            <LogOut className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            <span className="hidden sm:inline">Logout</span>
-            <span className="sm:hidden">Out</span>
-          </Button>
-        </div>
-        <div className="text-center space-y-3">
-          <div className="mx-auto w-10 h-10 sm:w-12 sm:h-12 bg-profit/10 rounded-full flex items-center justify-center crypto-glow">
-            <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 crypto-profit" />
-          </div>
-          <h2 className="text-lg sm:text-xl font-bold crypto-text-primary">Credentials Found!</h2>
-          <p className="crypto-text-secondary text-xs sm:text-sm">Redirecting to YouTube connect...</p>
-          <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin crypto-profit mx-auto" />
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[#fd1d1d]" />
       </div>
     )
   }

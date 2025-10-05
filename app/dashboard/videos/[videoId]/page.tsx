@@ -148,8 +148,8 @@ export default function VideoDetailPage() {
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid lg:grid-cols-1 gap-8">
+        <div className="space-y-6">
           {/* Main Video Card */}
           <Card>
             <CardContent className="p-0">
@@ -309,147 +309,6 @@ export default function VideoDetailPage() {
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="space-y-6">
-          {/* Performance Indicators */}
-          {videoData.analytics_summary && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="w-5 h-5" />
-                  Performance Indicators
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-2 rounded border">
-                    <span className="text-sm">High Performing</span>
-                    <Badge variant={videoData.analytics_summary.performance_indicators?.is_high_performing ? "default" : "secondary"}>
-                      {videoData.analytics_summary.performance_indicators?.is_high_performing ? "Yes" : "No"}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-2 rounded border">
-                    <span className="text-sm">Viral Potential</span>
-                    <Badge variant={videoData.analytics_summary.performance_indicators?.is_viral_potential ? "default" : "secondary"}>
-                      {videoData.analytics_summary.performance_indicators?.is_viral_potential ? "Yes" : "No"}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-2 rounded border">
-                    <span className="text-sm">High Engagement</span>
-                    <Badge variant={videoData.analytics_summary.performance_indicators?.is_high_engagement ? "default" : "secondary"}>
-                      {videoData.analytics_summary.performance_indicators?.is_high_engagement ? "Yes" : "No"}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Engagement Breakdown */}
-          {videoData.analytics_summary && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="w-5 h-5" />
-                  Engagement Breakdown
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Likes</span>
-                    <span className="text-sm font-medium">{videoData.analytics_summary.engagement_breakdown?.likes_percentage || 0}%</span>
-                  </div>
-                  <Progress value={videoData.analytics_summary.engagement_breakdown?.likes_percentage || 0} className="h-2" />
-                  
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Comments</span>
-                    <span className="text-sm font-medium">{videoData.analytics_summary.engagement_breakdown?.comments_percentage || 0}%</span>
-                  </div>
-                  <Progress value={videoData.analytics_summary.engagement_breakdown?.comments_percentage || 0} className="h-2" />
-                </div>
-                
-                <div className="pt-3 border-t">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">{videoData.analytics_summary.total_engagement || 0}</div>
-                    <div className="text-xs text-muted-foreground">Total Engagement</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Content Analysis */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Content Analysis</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Content Type</span>
-                  <Badge variant="outline">{videoData.content_type || "Not specified"}</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Growth Potential</span>
-                  <Badge className={getGrowthColor(videoData.growth_potential)}>
-                    {videoData.growth_potential || "Not specified"}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Category ID</span>
-                  <Badge variant="outline">{videoData.category_id || "Not specified"}</Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Tags */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Tag className="w-5 h-5" />
-                Tags
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {videoData.tags && videoData.tags.length > 0 ? (
-                  videoData.tags.map((tag, index) => (
-                    <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                      <Tag className="w-3 h-3" />
-                      {tag}
-                    </Badge>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground">No tags available</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button className="w-full crypto-button-primary">
-                Edit Video
-              </Button>
-              <Button variant="outline" className="w-full">
-                Regenerate Content
-              </Button>
-              <Button variant="outline" className="w-full">
-                Schedule Publishing
-              </Button>
-              <Button variant="outline" className="w-full">
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Open in YouTube Studio
-              </Button>
             </CardContent>
           </Card>
         </div>

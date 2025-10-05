@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Upload, Video, BarChart3, Menu, X, List, ChevronDown, ChevronRight } from "lucide-react"
-import useTemp from "@/hooks/common/useTemp"
 import { useChannelPlaylists } from "@/hooks/dashboard/playlists/useChannelPlaylists"
 
 const sidebarItems = [
@@ -36,7 +35,7 @@ export function Sidebar() {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isPlaylistsOpen, setIsPlaylistsOpen] = useState(false)
-  const { getYouTubeToken, refreshYouTubeToken, isLoading } = useTemp()
+  
   const { playlists, isLoading: playlistsLoading } = useChannelPlaylists()
   const playlistsRef = useRef<HTMLDivElement>(null)
 
@@ -92,7 +91,7 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] w-64 border-r border-primary bg-secondary transition-transform duration-300 ease-in-out crypto-glow",
+          "fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] w-64 border-r border-[var(--border-primary)] bg-secondary transition-transform duration-300 ease-in-out",
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
       >
@@ -104,10 +103,10 @@ export function Sidebar() {
                 return (
                   <Link key={item.href} href={item.href}>
                     <Button
-                      variant={isActive ? "crypto" : "cryptoGhost"}
+                      variant="ghost"
                       className={cn(
-                        "w-full justify-start gap-4 h-12 crypto-hover-glow",
-                        isActive && "crypto-glow",
+                        "w-full justify-start gap-4 h-12 rounded-lg",
+                        isActive ? "bg-[var(--bg-tertiary)] text-foreground" : "hover:bg-[var(--bg-tertiary)]",
                       )}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
@@ -121,10 +120,10 @@ export function Sidebar() {
               {/* YouTube Playlists Dropdown */}
               <div className="space-y-4" ref={playlistsRef}>
                 <Button
-                  variant={pathname === '/dashboard/playlists' ? "crypto" : "cryptoGhost"}
+                  variant="ghost"
                   className={cn(
-                    "w-full justify-between h-12 px-3 cursor-pointer gap-3 mb-2 crypto-hover-glow",
-                    pathname === '/dashboard/playlists' && "crypto-glow"
+                    "w-full justify-between h-12 px-3 cursor-pointer gap-3 mb-2 rounded-lg",
+                    pathname === '/dashboard/playlists' ? "bg-[var(--bg-tertiary)] text-foreground" : "hover:bg-[var(--bg-tertiary)]"
                   )}
                   onClick={() => setIsPlaylistsOpen(!isPlaylistsOpen)}
                 >
@@ -151,11 +150,10 @@ export function Sidebar() {
                           <Button
                             variant="ghost"
                             size="sm"
-                                                         className={cn(
-                               "w-full justify-start h-10 px-3 text-sm cursor-pointer mb-2",
-                               pathname === `/dashboard/playlists?id=${playlist.id}` && 
-                               "bg-brand-primary text-white hover:bg-brand-primary-dark crypto-glow"
-                             )}
+                            className={cn(
+                              "w-full justify-start h-10 px-3 text-sm cursor-pointer mb-2 rounded-md",
+                              pathname === `/dashboard/playlists?id=${playlist.id}` ? "bg-[var(--bg-tertiary)] text-foreground" : "hover:bg-[var(--bg-tertiary)]"
+                            )}
                             onClick={() => {
                               setIsMobileMenuOpen(false)
                               // Don't close the playlists dropdown when clicking on a playlist
@@ -179,20 +177,7 @@ export function Sidebar() {
             </nav>
           </div>
 
-          {/* Bottom section */}
-          <div className="border-t border-primary p-4">
-            <div className="crypto-card rounded-lg p-4 space-y-2">
-              <h4 className="text-sm font-medium crypto-text-primary">YouTube Token (temp)</h4>
-              <div className="grid grid-cols-1 gap-2">
-                <Button size="sm" variant="cryptoSecondary" disabled={isLoading} onClick={() => getYouTubeToken()}>
-                  Get Token
-                </Button>
-                <Button size="sm" variant="cryptoGhost" disabled={isLoading} onClick={() => refreshYouTubeToken()}>
-                  Refresh Token
-                </Button>
-              </div>
-            </div>
-          </div>
+          
         </div>
       </aside>
 

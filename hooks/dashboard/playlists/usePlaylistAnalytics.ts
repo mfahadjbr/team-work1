@@ -1,10 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
-import { ComprehensivePlaylistResponse } from "@/types/dashboard/playlists";
+
+interface PlaylistDetailsResponse {
+  success: boolean;
+  message: string;
+  data: any; // conforms to backend shape: { playlist_id, playlist_name, analytics: { ... } }
+}
 
 const usePlaylistAnalytics = (playlistId: string) => {
   const [playlistData, setPlaylistData] =
-    useState<ComprehensivePlaylistResponse | null>(null);
+    useState<PlaylistDetailsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,7 +20,7 @@ const usePlaylistAnalytics = (playlistId: string) => {
       const token = localStorage.getItem('auth_token') 
 
       const response = await fetch(
-        `https://saas-backend.duckdns.org/dashboard/playlists/${playlistId}/comprehensive?refresh=${refresh}`,
+        `https://saas-backend.duckdns.org/playlists/${playlistId}?refresh=${refresh}`,
         {
           headers: {
             Accept: "application/json",
@@ -28,7 +33,7 @@ const usePlaylistAnalytics = (playlistId: string) => {
         throw new Error("Failed to fetch comprehensive playlist data");
       }
 
-      const data: ComprehensivePlaylistResponse = await response.json();
+      const data: PlaylistDetailsResponse = await response.json();
       setPlaylistData(data);
     } catch (err: any) {
       setError(err.message);

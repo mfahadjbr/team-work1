@@ -7,6 +7,18 @@ export interface ChannelPlaylist {
   name: string
 }
 
+interface PlaylistsApiResponse {
+  success: boolean
+  message: string
+  data?: {
+    playlists?: Array<{
+      playlist_id: string
+      playlist_name: string
+    }>
+  }
+  refreshed?: boolean
+}
+
 export function useChannelPlaylists() {
   const [playlists, setPlaylists] = useState<ChannelPlaylist[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -17,10 +29,13 @@ export function useChannelPlaylists() {
       setIsLoading(true)
       setError(null)
       
-      // Get token from localStorage (you might want to adjust this based on your auth implementation)
-      const token = localStorage.getItem('auth_token') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1emFpciIsImV4cCI6MTc1Njk1Mjg0M30.Ihzz_NStHsvcxRQHL7DniM5ZhvBT4oUjGlUTDYeGpww'
-      
-      const response = await fetch('https://saas-backend.duckdns.org/playlists/channel-playlists', {
+      // Get token from localStorage
+      const token = localStorage.getItem('auth_token')
+      if (!token) {
+        throw new Error('Authentication required')
+      }
+
+      const response = await fetch('https://saas-backend.duckdns.org/playlists/?refresh=false', {
         method: 'GET',
         headers: {
           'accept': 'application/json',
@@ -32,8 +47,13 @@ export function useChannelPlaylists() {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      const data: ChannelPlaylist[] = await response.json()
-      setPlaylists(data)
+      const data: PlaylistsApiResponse = await response.json()
+      const items: ChannelPlaylist[] = data?.data?.playlists?.map(p => ({
+        id: p.playlist_id,
+        name: p.playlist_name,
+      })) || []
+
+      setPlaylists(items)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
       console.error('Error fetching channel playlists:', err)

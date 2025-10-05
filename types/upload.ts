@@ -36,6 +36,7 @@ export interface UploadState {
   isSavingTitle: boolean
   isSavingDescription: boolean
   isSavingTimestamps: boolean
+  allInOneResult?: any
 }
 
 export interface UploadHandlers {
@@ -48,6 +49,7 @@ export interface UploadHandlers {
   handlePublish: (type: "public" | "private" | "unlisted" | "schedule") => Promise<void>
   handlePlaylistSelection: (playlistId: string) => void
   handleSaveApiKey: () => Promise<void>
+  handleAllInOne?: () => Promise<void>
 }
 
 export interface StepConfig {

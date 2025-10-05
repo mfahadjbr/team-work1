@@ -30,7 +30,7 @@ export interface PlaylistVideoDetails {
   growth_potential?: string;
 }
 
-// Matches GET /dashboard/playlists/{playlistId}/videos response
+// Matches GET /playlists/{playlistId}/videos response (maps to flattened array)
 export interface PlaylistVideosResponse {
   success: boolean;
   message: string;
@@ -50,7 +50,7 @@ const usePlaylistVideos = (playlistId: string) => {
       const token = localStorage.getItem('auth_token');
 
       const response = await fetch(
-        `https://saas-backend.duckdns.org/dashboard/playlists/${playlistId}/videos?refresh=${refresh}`,
+        `https://saas-backend.duckdns.org/playlists/${playlistId}/videos?refresh=${refresh}`,
         {
           headers: {
             Accept: "application/json",
@@ -63,8 +63,14 @@ const usePlaylistVideos = (playlistId: string) => {
         throw new Error("Failed to fetch playlist videos");
       }
 
-      const data: PlaylistVideosResponse = await response.json();
-      setPlaylistData(data);
+      const raw = await response.json();
+      const mapped: PlaylistVideosResponse = {
+        success: !!raw?.success,
+        message: raw?.message || '',
+        data: Array.isArray(raw?.data?.videos) ? raw.data.videos : [],
+        count: typeof raw?.data?.total_videos === 'number' ? raw.data.total_videos : (Array.isArray(raw?.data?.videos) ? raw.data.videos.length : 0),
+      };
+      setPlaylistData(mapped);
     } catch (err: any) {
       setError(err.message);
     } finally {

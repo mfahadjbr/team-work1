@@ -128,6 +128,22 @@ export default function YouTubeConnectPage() {
     }
   }, [isLoadingAny, hasCredentials, authUrl, hasAnyError, lastChecked, showNoCredentials, handleYouTubeConnect])
 
+  // If checking, show only a full-screen loader
+  if (isChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // If credentials exist, immediately redirect to dashboard with minimal UI
+  useEffect(() => {
+    if (hasCredentials && !isLoadingAny) {
+      router.push('/dashboard')
+    }
+  }, [hasCredentials, isLoadingAny, router])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center p-3 sm:p-4 lg:p-6">
       <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-xl">
@@ -172,63 +188,18 @@ export default function YouTubeConnectPage() {
             )}
 
             {/* Loading State */}
-            {isLoadingAny && (
+            {isLoadingAny && !isChecking && (
               <Alert>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <AlertDescription>
-                  {isChecking ? 'Checking YouTube credentials...' :
-                   isLoading ? 'Creating OAuth token...' :
+                  {isLoading ? 'Creating OAuth token...' :
                    isConnecting ? 'Connecting to YouTube...' :
                    'Loading...'}
                 </AlertDescription>
               </Alert>
             )}
 
-            {/* Credentials Found - Valid */}
-            {showCredentialsFound && !isLoadingAny && (
-              <Alert>
-                <CheckCircle className="h-4 w-4" />
-                <AlertDescription>
-                  <div className="space-y-2">
-                    <p>✅ YouTube channel is connected and active!</p>
-                    <div className="text-sm text-muted-foreground space-y-1">
-                      <p>• Client ID: {credentials?.client_id_preview || 'Unknown'}</p>
-                      <p>• Status: {credentials?.is_active ? 'Active' : 'Inactive'}</p>
-                      <p>• Backend will automatically refresh tokens as needed</p>
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                      <Button
-                        onClick={() => {
-                          // Check if there's a stored redirect URL for immediate redirect
-                          const redirectUrl = localStorage.getItem('youtube_redirect_after_auth')
-                          if (redirectUrl) {
-                            localStorage.removeItem('youtube_redirect_after_auth')
-                            router.push(redirectUrl)
-                          } else {
-                            handleProceedToDashboard()
-                          }
-                        }}
-                        className="crypto-button-primary flex-1"
-                        size="sm"
-                      >
-                        {localStorage.getItem('youtube_redirect_after_auth') ? 'Continue to Previous Page' : 'Go to Dashboard'}
-                      </Button>
-                      <Button
-                        onClick={handleRefreshCheck}
-                        variant="outline"
-                        size="sm"
-                        disabled={isChecking}
-                        className="flex-1 sm:flex-none"
-                      >
-                        <RefreshCw className={`h-4 w-4 mr-1 ${isChecking ? 'animate-spin' : ''}`} />
-                        <span className="hidden sm:inline">Refresh Check</span>
-                        <span className="sm:hidden">Refresh</span>
-                      </Button>
-                    </div>
-                  </div>
-                </AlertDescription>
-              </Alert>
-            )}
+            {/* Credentials Found - Valid: now skipped (auto-redirect) */}
             
             {/* Error Display */}
             {hasAnyError && !isLoadingAny && (
